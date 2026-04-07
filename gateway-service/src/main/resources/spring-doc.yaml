@@ -5,5 +5,8 @@ springdoc:
       - name: Auth Service
         url: /api/auth/v3/api-docs
         displayName: Сервис Авторизации
+      - name: Investment Service
+        url: /api/investment/v3/api-docs
+        displayName: Сервис Инвестиций
   api-docs:
     path: /v3/api-docs

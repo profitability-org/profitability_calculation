@@ -21,3 +21,7 @@ spring:
           uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
+        - id: investment-service
+          uri: lb://investment-service
+          predicates:
+            - Path=/api/investment/**
