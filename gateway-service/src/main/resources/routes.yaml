@@ -1,0 +1,23 @@
+spring:
+  cloud:
+    gateway.server.webflux:
+      globalcors:
+        cors-configurations:
+          '[/**]': # Применять ко всем путям
+            allowedOrigins: "http://localhost:5173" # Разрешить фронтенд
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*" # Разрешить любые заголовки (включая твой Authorization)
+            allowCredentials: true # Разрешить передачу кук и Auth-заголовков
+      discovery:
+        locator:
+          enabled: true # Позволяет шлюзу создавать маршруты на основе имен в Eureka
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**

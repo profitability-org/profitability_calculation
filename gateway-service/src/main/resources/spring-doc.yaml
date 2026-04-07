@@ -1,0 +1,9 @@
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Auth Service
+        url: /api/auth/v3/api-docs
+        displayName: Сервис Авторизации
+  api-docs:
+    path: /v3/api-docs

@@ -31,7 +31,7 @@ dependencies {
 //    implementation(libs.spring.grpc.client.starter)
 
     // Discovery
-//    implementation(libs.spring.cloud.starter.netflix.eureka.client)
+    implementation(libs.spring.cloud.starter.netflix.eureka.client)
 
     // Kotlin & JSON
     implementation(libs.kotlin.reflect)
