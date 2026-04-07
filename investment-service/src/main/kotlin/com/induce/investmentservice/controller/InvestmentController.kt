@@ -1,5 +1,7 @@
 package com.induce.investmentservice.controller
 
+import com.induce.investmentservice.dto.BondRequest
+import com.induce.investmentservice.dto.BondResponse
 import com.induce.investmentservice.dto.DepositRequest
 import com.induce.investmentservice.dto.DepositResponse
 import com.induce.investmentservice.model.InvestmentType
@@ -26,4 +28,13 @@ class InvestmentController(private val calculationFactory: CalculationFactory) {
             calculationFactory.getStrategy<DepositRequest, DepositResponse>(InvestmentType.DEPOSIT)
                 .calculateAndSave(request, userId)
         )
+
+    @PostMapping("/bond")
+    fun calculateBond(
+        @RequestHeader("X-Auth-User-Id") userId: UUID,
+        @Valid @RequestBody request: BondRequest
+    ): ResponseEntity<BondResponse> {
+        val strategy = calculationFactory.getStrategy<BondRequest, BondResponse>(InvestmentType.BOND)
+        return ResponseEntity.ok(strategy.calculateAndSave(request, userId))
+    }
 }
