@@ -21,7 +21,7 @@ import java.util.UUID
 @RequestMapping("/api/investment")
 class InvestmentController(private val calculationFactory: CalculationFactory) {
 
-    @PostMapping("/deposit")
+    @PostMapping("/deposit/add")
     fun calculateDeposit(
         @RequestHeader("X-Auth-User-Id") userId: UUID,
         @Valid @RequestBody request: DepositRequest
@@ -31,7 +31,7 @@ class InvestmentController(private val calculationFactory: CalculationFactory) {
                 .calculateAndSave(request, userId)
         )
 
-    @PostMapping("/bond")
+    @PostMapping("/bond/add")
     fun calculateBond(
         @RequestHeader("X-Auth-User-Id") userId: UUID,
         @Valid @RequestBody request: BondRequest
@@ -40,7 +40,7 @@ class InvestmentController(private val calculationFactory: CalculationFactory) {
         return ResponseEntity.ok(strategy.calculateAndSave(request, userId))
     }
 
-    @PostMapping("/stock")
+    @PostMapping("/stock/add")
     fun calculateStock(
         @RequestHeader("X-Auth-User-Id") userId: UUID,
         @Valid @RequestBody request: StockRequest
