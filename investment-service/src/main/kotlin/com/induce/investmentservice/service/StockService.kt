@@ -1,5 +1,6 @@
 package com.induce.investmentservice.service
 
+import com.induce.investmentservice.dto.StockHistoryResponse
 import com.induce.investmentservice.dto.StockRequest
 import com.induce.investmentservice.dto.StockResponse
 import com.induce.investmentservice.model.InvestmentType
@@ -93,5 +94,26 @@ class StockService(
             frequency = request.frequency,
             portfolioGrowthGraph = graph
         )
+    }
+
+    fun getAllByUser(userId: UUID): List<StockHistoryResponse> {
+        return stockRepository.findAllByUserId(userId).map {
+            StockHistoryResponse(
+                id = it.id,
+                title = it.title,
+                purchasePrice = it.purchasePrice,
+                targetPrice = it.targetPrice,
+                holdingMonths = it.holdingMonths,
+                dividendRate = it.dividendRate,
+                commission = it.commission,
+                frequency = it.frequency,
+                totalYieldPercent = it.totalYieldPercent,
+                totalYieldAmount = it.totalYieldAmount,
+                dividendIncome = it.dividendIncome,
+                capitalGain = it.capitalGain,
+                netYield = it.netYield,
+                createdAt = it.createdAt
+            )
+        }
     }
 }

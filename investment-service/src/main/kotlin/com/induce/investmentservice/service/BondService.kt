@@ -1,5 +1,6 @@
 package com.induce.investmentservice.service
 
+import com.induce.investmentservice.dto.BondHistoryResponse
 import com.induce.investmentservice.dto.BondRequest
 import com.induce.investmentservice.dto.BondResponse
 import com.induce.investmentservice.model.Bond
@@ -97,5 +98,24 @@ class BondService(
             frequency = request.frequency,
             couponPaymentsGraph = couponPaymentsGraph
         )
+    }
+    fun getAllByUser(userId: UUID): List<BondHistoryResponse> {
+        return bondRepository.findAllByUserId(userId).map {
+            BondHistoryResponse(
+                id = it.id,
+                title = it.title,
+                nominal = it.nominal,
+                purchasePricePercent = it.purchasePricePercent,
+                couponRate = it.couponRate,
+                termMonths = it.termMonths,
+                taxRate = it.taxRate,
+                frequency = it.frequency,
+                ytm = it.ytm,
+                netYield = it.netYield,
+                totalProfitAmount = it.totalProfitAmount,
+                totalProfitPercent = it.totalProfitPercent,
+                createdAt = it.createdAt
+            )
+        }
     }
 }

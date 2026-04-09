@@ -1,5 +1,6 @@
 package com.induce.investmentservice.service
 
+import com.induce.investmentservice.dto.DepositHistoryResponse
 import com.induce.investmentservice.dto.DepositRequest
 import com.induce.investmentservice.dto.DepositResponse
 import com.induce.investmentservice.model.Deposit
@@ -69,5 +70,22 @@ class DepositService(private val depositRepository: DepositRepository) :
             frequency = request.frequency,
             capitalGrowthGraph = graph,
         )
+    }
+    fun getAllByUser(userId: UUID): List<DepositHistoryResponse> {
+        return depositRepository.findAllByUserId(userId).map {
+            DepositHistoryResponse(
+                id = it.id,
+                title = it.title,
+                amount = it.amount,
+                interestRate = it.interestRate,
+                termMonths = it.termMonths,
+                capitalization = it.capitalization,
+                frequency = it.frequency,
+                finalAmount = it.finalAmount,
+                accruedInterest = it.accruedInterest,
+                effectiveRate = it.effectiveRate,
+                createdAt = it.createdAt
+            )
+        }
     }
 }
