@@ -4,6 +4,8 @@ import com.induce.investmentservice.dto.BondRequest
 import com.induce.investmentservice.dto.BondResponse
 import com.induce.investmentservice.dto.DepositRequest
 import com.induce.investmentservice.dto.DepositResponse
+import com.induce.investmentservice.dto.StockRequest
+import com.induce.investmentservice.dto.StockResponse
 import com.induce.investmentservice.model.InvestmentType
 import com.induce.investmentservice.service.CalculationFactory
 import jakarta.validation.Valid
@@ -35,6 +37,15 @@ class InvestmentController(private val calculationFactory: CalculationFactory) {
         @Valid @RequestBody request: BondRequest
     ): ResponseEntity<BondResponse> {
         val strategy = calculationFactory.getStrategy<BondRequest, BondResponse>(InvestmentType.BOND)
+        return ResponseEntity.ok(strategy.calculateAndSave(request, userId))
+    }
+
+    @PostMapping("/stock")
+    fun calculateStock(
+        @RequestHeader("X-Auth-User-Id") userId: UUID,
+        @Valid @RequestBody request: StockRequest
+    ): ResponseEntity<StockResponse> {
+        val strategy = calculationFactory.getStrategy<StockRequest, StockResponse>(InvestmentType.STOCK)
         return ResponseEntity.ok(strategy.calculateAndSave(request, userId))
     }
 }
