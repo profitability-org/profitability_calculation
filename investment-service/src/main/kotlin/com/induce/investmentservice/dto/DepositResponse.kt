@@ -4,6 +4,7 @@ import com.induce.investmentservice.model.FinancialFrequency
 import java.math.BigDecimal
 
 data class DepositResponse(
+    val title: String,
     val finalAmount: BigDecimal,
     val accruedInterest: BigDecimal,
     val effectiveRate: BigDecimal,

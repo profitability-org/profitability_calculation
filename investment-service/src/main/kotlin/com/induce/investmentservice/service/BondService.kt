@@ -74,6 +74,7 @@ class BondService(
         // 6. Сохранение
         val bondEntity = Bond(
             userId = userId,
+            title = request.title,
             nominal = nominal,
             purchasePricePercent = request.purchasePricePercent,
             couponRate = request.couponRate,
@@ -88,6 +89,7 @@ class BondService(
         bondRepository.save(bondEntity)
 
         return BondResponse(
+            title = request.title,
             ytm = ytm,
             netYield = netYield,
             totalProfitAmount = netProfit.setScale(2, RoundingMode.HALF_UP),

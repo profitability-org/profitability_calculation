@@ -66,6 +66,7 @@ class StockService(
         stockRepository.save(
             Stock(
                 userId = userId,
+                title = request.title,
                 purchasePrice = request.purchasePrice,
                 targetPrice = request.targetPrice,
                 holdingMonths = totalMonths,
@@ -82,7 +83,9 @@ class StockService(
         )
 
         return StockResponse(
-            totalYieldPercent = netProfit.divide(totalInvestment, 10, RoundingMode.HALF_UP).multiply(BigDecimal("100")).setScale(2, RoundingMode.HALF_UP),
+            title = request.title,
+            totalYieldPercent = netProfit.divide(totalInvestment, 10, RoundingMode.HALF_UP).multiply(BigDecimal("100"))
+                .setScale(2, RoundingMode.HALF_UP),
             totalYieldAmount = netProfit.setScale(2, RoundingMode.HALF_UP),
             netYield = netYield,
             capitalGain = totalCapitalGain.subtract(commissionAmount).setScale(2, RoundingMode.HALF_UP),

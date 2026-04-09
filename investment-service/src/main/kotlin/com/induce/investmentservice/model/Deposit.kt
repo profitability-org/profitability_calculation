@@ -21,6 +21,9 @@ class Deposit(
     @Column(name = "user_id", nullable = false)
     val userId: UUID,
 
+    @Column(length = 20)
+    val title: String,
+
     val amount: BigDecimal,
     val interestRate: BigDecimal,
     val termMonths: Int,

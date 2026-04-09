@@ -21,6 +21,9 @@ class Stock(
     @Column(name = "user_id", nullable = false)
     val userId: UUID,
 
+    @Column(length = 20)
+    val title: String,
+
     val purchasePrice: BigDecimal,
     val targetPrice: BigDecimal,
     val holdingMonths: Int,

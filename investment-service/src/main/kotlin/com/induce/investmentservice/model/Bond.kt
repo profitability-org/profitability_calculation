@@ -22,6 +22,9 @@ class Bond(
     @Column(name = "user_id", nullable = false)
     val userId: UUID,
 
+    @Column(length = 20)
+    val title: String,
+
     @Column(precision = 19, scale = 2)
     val nominal: BigDecimal,
 

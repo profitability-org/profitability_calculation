@@ -48,13 +48,26 @@ class DepositService(private val depositRepository: DepositRepository) :
 
         depositRepository.save(
             Deposit(
-                userId = userId, amount = request.amount, interestRate = request.interestRate,
-                termMonths = request.termMonths, capitalization = request.capitalization,
-                frequency = request.frequency, finalAmount = finalAmount,
-                accruedInterest = finalAmount.subtract(request.amount), effectiveRate = effectiveRate
+                userId = userId,
+                title = request.title,
+                amount = request.amount,
+                interestRate = request.interestRate,
+                termMonths = request.termMonths,
+                capitalization = request.capitalization,
+                frequency = request.frequency,
+                finalAmount = finalAmount,
+                accruedInterest = finalAmount.subtract(request.amount),
+                effectiveRate = effectiveRate
             )
         )
 
-        return DepositResponse(finalAmount, finalAmount.subtract(request.amount), effectiveRate, request.frequency, graph)
+        return DepositResponse(
+            title = request.title,
+            finalAmount = finalAmount,
+            accruedInterest = finalAmount.subtract(request.amount),
+            effectiveRate = effectiveRate,
+            frequency = request.frequency,
+            capitalGrowthGraph = graph,
+        )
     }
 }
