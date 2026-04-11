@@ -4,7 +4,6 @@ import com.induce.investmentservice.dto.BondHistoryResponse
 import com.induce.investmentservice.dto.BondRequest
 import com.induce.investmentservice.dto.BondResponse
 import com.induce.investmentservice.model.Bond
-import com.induce.investmentservice.model.InvestmentType
 import com.induce.investmentservice.repository.BondRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,12 +14,9 @@ import java.util.UUID
 @Service
 class BondService(
     private val bondRepository: BondRepository
-) : CalculationStrategy<BondRequest, BondResponse> {
+) {
 
-    override fun getType(): InvestmentType = InvestmentType.BOND
-
-    @Transactional
-    override fun calculateAndSave(request: BondRequest, userId: UUID): BondResponse {
+    fun calculate(request: BondRequest): BondResponse {
         val nominal = request.nominal
         val totalMonths = request.termMonths
         val paymentStep = request.frequency.months
@@ -72,23 +68,6 @@ class BondService(
             .multiply(BigDecimal("100"))
             .setScale(2, RoundingMode.HALF_UP)
 
-        // 6. Сохранение
-        val bondEntity = Bond(
-            userId = userId,
-            title = request.title,
-            nominal = nominal,
-            purchasePricePercent = request.purchasePricePercent,
-            couponRate = request.couponRate,
-            termMonths = totalMonths,
-            taxRate = request.taxRate,
-            frequency = request.frequency,
-            ytm = ytm,
-            netYield = netYield,
-            totalProfitAmount = netProfit.setScale(2, RoundingMode.HALF_UP),
-            totalProfitPercent = totalProfitPercent
-        )
-        bondRepository.save(bondEntity)
-
         return BondResponse(
             title = request.title,
             ytm = ytm,
@@ -99,6 +78,31 @@ class BondService(
             couponPaymentsGraph = couponPaymentsGraph
         )
     }
+
+    @Transactional
+    fun calculateAndSave(request: BondRequest, userId: UUID): BondResponse {
+
+        val response = calculate(request)
+        // 6. Сохранение
+        val bondEntity = Bond(
+            userId = userId,
+            title = request.title,
+            nominal = request.nominal,
+            purchasePricePercent = request.purchasePricePercent,
+            couponRate = request.couponRate,
+            termMonths = request.termMonths,
+            taxRate = request.taxRate,
+            frequency = request.frequency,
+            ytm = response.ytm,
+            netYield = response.netYield,
+            totalProfitAmount = response.totalProfitAmount,
+            totalProfitPercent = response.totalProfitPercent
+        )
+        bondRepository.save(bondEntity)
+
+        return response
+    }
+
     fun getAllByUser(userId: UUID): List<BondHistoryResponse> {
         return bondRepository.findAllByUserId(userId).map {
             BondHistoryResponse(

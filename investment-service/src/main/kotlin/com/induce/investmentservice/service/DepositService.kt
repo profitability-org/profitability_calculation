@@ -4,7 +4,6 @@ import com.induce.investmentservice.dto.DepositHistoryResponse
 import com.induce.investmentservice.dto.DepositRequest
 import com.induce.investmentservice.dto.DepositResponse
 import com.induce.investmentservice.model.Deposit
-import com.induce.investmentservice.model.InvestmentType
 import com.induce.investmentservice.repository.DepositRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,13 +12,9 @@ import java.math.RoundingMode
 import java.util.UUID
 
 @Service
-class DepositService(private val depositRepository: DepositRepository) :
-    CalculationStrategy<DepositRequest, DepositResponse> {
+class DepositService(private val depositRepository: DepositRepository) {
 
-    override fun getType() = InvestmentType.DEPOSIT
-
-    @Transactional
-    override fun calculateAndSave(request: DepositRequest, userId: UUID): DepositResponse {
+    fun calculate(request: DepositRequest): DepositResponse {
         val compoundStep = request.frequency.months
         val monthlyRate = request.interestRate.divide(BigDecimal("1200"), 10, RoundingMode.HALF_UP)
 
@@ -47,21 +42,6 @@ class DepositService(private val depositRepository: DepositRepository) :
             .subtract(BigDecimal.ONE).divide(termInYears, 10, RoundingMode.HALF_UP)
             .multiply(BigDecimal("100")).setScale(2, RoundingMode.HALF_UP)
 
-        depositRepository.save(
-            Deposit(
-                userId = userId,
-                title = request.title,
-                amount = request.amount,
-                interestRate = request.interestRate,
-                termMonths = request.termMonths,
-                capitalization = request.capitalization,
-                frequency = request.frequency,
-                finalAmount = finalAmount,
-                accruedInterest = finalAmount.subtract(request.amount),
-                effectiveRate = effectiveRate
-            )
-        )
-
         return DepositResponse(
             title = request.title,
             finalAmount = finalAmount,
@@ -71,6 +51,29 @@ class DepositService(private val depositRepository: DepositRepository) :
             capitalGrowthGraph = graph,
         )
     }
+
+    @Transactional
+    fun calculateAndSave(request: DepositRequest, userId: UUID): DepositResponse {
+        val response = calculate(request)
+
+        depositRepository.save(
+            Deposit(
+                userId = userId,
+                title = request.title,
+                amount = request.amount,
+                interestRate = request.interestRate,
+                termMonths = request.termMonths,
+                capitalization = request.capitalization,
+                frequency = request.frequency,
+                finalAmount = response.finalAmount,
+                accruedInterest = response.accruedInterest,
+                effectiveRate = response.effectiveRate
+            )
+        )
+
+        return response
+    }
+
     fun getAllByUser(userId: UUID): List<DepositHistoryResponse> {
         return depositRepository.findAllByUserId(userId).map {
             DepositHistoryResponse(

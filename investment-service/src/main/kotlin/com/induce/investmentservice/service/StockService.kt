@@ -3,24 +3,19 @@ package com.induce.investmentservice.service
 import com.induce.investmentservice.dto.StockHistoryResponse
 import com.induce.investmentservice.dto.StockRequest
 import com.induce.investmentservice.dto.StockResponse
-import com.induce.investmentservice.model.InvestmentType
 import com.induce.investmentservice.model.Stock
 import com.induce.investmentservice.repository.StockRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.util.*
+import java.util.UUID
 
 @Service
 class StockService(
     private val stockRepository: StockRepository
-) : CalculationStrategy<StockRequest, StockResponse> {
-
-    override fun getType() = InvestmentType.STOCK
-
-    @Transactional
-    override fun calculateAndSave(request: StockRequest, userId: UUID): StockResponse {
+){
+    fun calculate(request: StockRequest): StockResponse {
         val totalMonths = request.holdingMonths
         val step = request.frequency.months
 
@@ -64,25 +59,6 @@ class StockService(
             .multiply(BigDecimal("100"))
             .setScale(2, RoundingMode.HALF_UP)
 
-        stockRepository.save(
-            Stock(
-                userId = userId,
-                title = request.title,
-                purchasePrice = request.purchasePrice,
-                targetPrice = request.targetPrice,
-                holdingMonths = totalMonths,
-                dividendRate = request.dividendRate,
-                commission = request.commission,
-                frequency = request.frequency,
-                totalYieldPercent = netProfit.divide(totalInvestment, 10, RoundingMode.HALF_UP)
-                    .multiply(BigDecimal("100")),
-                totalYieldAmount = netProfit.setScale(2, RoundingMode.HALF_UP),
-                dividendIncome = accumulatedDividends.setScale(2, RoundingMode.HALF_UP),
-                capitalGain = totalCapitalGain.subtract(commissionAmount).setScale(2, RoundingMode.HALF_UP),
-                netYield = netYield
-            )
-        )
-
         return StockResponse(
             title = request.title,
             totalYieldPercent = netProfit.divide(totalInvestment, 10, RoundingMode.HALF_UP).multiply(BigDecimal("100"))
@@ -94,6 +70,30 @@ class StockService(
             frequency = request.frequency,
             portfolioGrowthGraph = graph
         )
+    }
+    @Transactional
+    fun calculateAndSave(request: StockRequest, userId: UUID): StockResponse {
+        val response = calculate(request)
+
+        stockRepository.save(
+            Stock(
+                userId = userId,
+                title = request.title,
+                purchasePrice = request.purchasePrice,
+                targetPrice = request.targetPrice,
+                holdingMonths = request.holdingMonths,
+                dividendRate = request.dividendRate,
+                commission = request.commission,
+                frequency = request.frequency,
+                totalYieldPercent = response.totalYieldPercent,
+                totalYieldAmount = response.totalYieldAmount,
+                dividendIncome = response.dividendIncome,
+                capitalGain = response.capitalGain,
+                netYield = response.netYield
+            )
+        )
+
+        return response
     }
 
     fun getAllByUser(userId: UUID): List<StockHistoryResponse> {
