@@ -7,8 +7,8 @@ plugins {
 }
 
 group = "com.induce"
-version = "0.0.1-SNAPSHOT"  
-description = "investment-service"
+version = "0.0.1-SNAPSHOT"
+description = "cbr-service"
 
 java {
     toolchain {
@@ -23,30 +23,15 @@ configurations {
 }
 
 dependencies {
-    // Spring Boot Starters
     implementation(libs.spring.boot.starter.webmvc)
-    implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.data.jpa)
-    implementation(libs.spring.boot.starter.security)
 
-    // Discovery
-    implementation(libs.spring.cloud.starter.netflix.eureka.client)
-
-    // Kotlin & JSON
     implementation(libs.kotlin.reflect)
     implementation(libs.jackson.module.kotlin)
 
-    // Database
+    implementation(libs.jackson.dataformat.xml)
+
     runtimeOnly(libs.postgresql)
-
-    // Documentation
-    implementation(libs.springdoc.openapi.webmvc)
-}
-
-dependencyManagement {
-    imports {
-        mavenBom(libs.spring.cloud.dependencies.get().toString())
-    }
 }
 
 kotlin {
