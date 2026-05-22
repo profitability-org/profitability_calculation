@@ -15,3 +15,9 @@ class InvalidCredentialsException :
 
 class UserNotFoundException(identifier: String) :
     AuthException("User '$identifier' not found", HttpStatus.NOT_FOUND)
+
+class TokenRefreshException(token: String, message: String) :
+    AuthException("Failed for [$token]: $message", HttpStatus.FORBIDDEN)
+
+class BadTokenException(message: String) :
+    AuthException(message, HttpStatus.UNAUTHORIZED)

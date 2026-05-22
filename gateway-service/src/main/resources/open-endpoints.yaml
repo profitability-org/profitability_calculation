@@ -3,6 +3,7 @@ app:
     open-endpoints:
       - "/api/auth/login"
       - "/api/auth/register"
+      - "/api/auth/refresh"
       - "/api/auth/v3/api-docs"
       - "/api/cbr/v3/api-docs"
       - "/api/investment/*/calculate"
