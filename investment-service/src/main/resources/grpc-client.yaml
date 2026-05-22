@@ -1,0 +1,6 @@
+spring:
+  grpc:
+    client:
+      default-channel:
+        address: "eureka:///cbr-service"
+        negotiation-type: plaintext

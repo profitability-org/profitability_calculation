@@ -2,6 +2,7 @@ rootProject.name = "profitability_calculation"
 
 include(":auth-service")
 include(":eureka-server")
-include("gateway-service")
-include("investment-service")
-include("cbr-service")
+include(":gateway-service")
+include(":investment-service")
+include(":cbr-service")
+include(":common-proto")

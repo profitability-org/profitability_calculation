@@ -5,7 +5,7 @@ WORKDIR /app
 # Копируем только файлы конфигурации для кэширования зависимостей
 COPY build.gradle.kts settings.gradle.kts ./
 COPY gradle/ gradle/
-#  COPY common-proto/build.gradle.kts common-proto/
+COPY common-proto/build.gradle.kts common-proto/
 # ... скопируй так же build.gradle.kts для всех модулей ...
 
 # Предварительно скачиваем зависимости (опционально, но ускоряет повторные билды)

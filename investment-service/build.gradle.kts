@@ -23,11 +23,16 @@ configurations {
 }
 
 dependencies {
+    implementation(project(":common-proto"))
     // Spring Boot Starters
     implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.security)
+    implementation(libs.spring.grpc.client.starter)
+
+    // gRPC Client & Proto
+    implementation(libs.grpc.netty.shaded)
 
     // Discovery
     implementation(libs.spring.cloud.starter.netflix.eureka.client)
@@ -45,6 +50,7 @@ dependencies {
 
 dependencyManagement {
     imports {
+        mavenBom(libs.spring.grpc.dependencies.get().toString())
         mavenBom(libs.spring.cloud.dependencies.get().toString())
     }
 }

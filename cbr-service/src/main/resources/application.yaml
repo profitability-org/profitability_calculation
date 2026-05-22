@@ -22,3 +22,6 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  grpc:
+    server:
+      port: 9092
