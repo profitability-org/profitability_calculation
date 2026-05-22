@@ -8,5 +8,8 @@ springdoc:
       - name: Investment Service
         url: /api/investment/v3/api-docs
         displayName: Сервис Инвестиций
+      - name: Cbr Service
+        url: /api/cbr/v3/api-docs
+        displayName: Сервис данных ЦБ
   api-docs:
     path: /v3/api-docs

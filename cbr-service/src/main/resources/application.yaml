@@ -1,5 +1,6 @@
 server:
   port: 8083
+
 spring:
   application:
     name: cbr-service
@@ -9,9 +10,9 @@ spring:
       - "optional:classpath:grpc-client.yaml"
       - "optional:classpath:spring-doc.yaml"
   datasource:
-    url: jdbc:postgresql://localhost:5432/profitability_cbr
-    username: postgres
-    password: 1234
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/profitability_cbr}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:1234}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

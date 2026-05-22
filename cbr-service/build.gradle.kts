@@ -23,15 +23,32 @@ configurations {
 }
 
 dependencies {
+    // Starters
     implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.spring.boot.starter.data.jpa)
+    implementation(libs.spring.boot.starter.validation)
 
     implementation(libs.kotlin.reflect)
-    implementation(libs.jackson.module.kotlin)
 
+    // XML
+    implementation(libs.jackson.module.kotlin)
     implementation(libs.jackson.dataformat.xml)
 
+    // Postgres
     runtimeOnly(libs.postgresql)
+
+    // Discovery
+    implementation(libs.spring.cloud.starter.netflix.eureka.client)
+
+    // Documentation
+    implementation(libs.springdoc.openapi.webmvc)
+}
+
+dependencyManagement {
+    imports {
+        mavenBom(libs.spring.grpc.dependencies.get().toString())
+        mavenBom(libs.spring.cloud.dependencies.get().toString())
+    }
 }
 
 kotlin {

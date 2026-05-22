@@ -25,3 +25,7 @@ spring:
           uri: lb://investment-service
           predicates:
             - Path=/api/investment/**
+        - id: cbr-service
+          uri: lb://cbr-service
+          predicates:
+            - Path=/api/cbr/**
