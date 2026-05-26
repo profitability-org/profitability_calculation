@@ -1,0 +1,124 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: profitability-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - profitability-backend
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  eureka-server:
+    build:
+      context: .
+      args:
+        MODULE_NAME: eureka-server
+    container_name: eureka-server
+    restart: unless-stopped
+    networks:
+      - profitability-backend
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:8761/ || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  gateway-service:
+    build:
+      context: .
+      args:
+        MODULE_NAME: gateway-service
+    container_name: gateway-service
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8080:8080'
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: 'true'
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+    networks:
+      - profitability-backend
+
+  auth-service:
+    build:
+      context: .
+      args:
+        MODULE_NAME: auth-service
+    container_name: auth-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/profitability_auth
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:?SPRING_DATASOURCE_PASSWORD is required}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: 'true'
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+    networks:
+      - profitability-backend
+
+  investment-service:
+    build:
+      context: .
+      args:
+        MODULE_NAME: investment-service
+    container_name: investment-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/profitability_investment
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:?SPRING_DATASOURCE_PASSWORD is required}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: 'true'
+    networks:
+      - profitability-backend
+
+  cbr-service:
+    build:
+      context: .
+      args:
+        MODULE_NAME: cbr-service
+    container_name: cbr-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/profitability_cbr
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:?SPRING_DATASOURCE_PASSWORD is required}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: 'true'
+    networks:
+      - profitability-backend
+
+networks:
+  profitability-backend:
+    driver: bridge
+
+volumes:
+  postgres-data:
