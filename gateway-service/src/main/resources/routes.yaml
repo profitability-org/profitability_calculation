@@ -1,9 +1,12 @@
 spring:
   cloud:
     gateway.server.webflux:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
       globalcors:
+        add-to-simple-url-handler-mapping: true
         cors-configurations:
-          '[/**]': # Применять ко всем путям
+          '[/**]':
             allowedOrigins:
               - "http://localhost:5173"
               - "https://profit.hakolr.dev"
@@ -13,8 +16,16 @@ spring:
               - PUT
               - DELETE
               - OPTIONS
-            allowedHeaders: "*" # Разрешить любые заголовки (включая твой Authorization)
-            allowCredentials: true # Разрешить передачу кук и Auth-заголовков
+            allowedHeaders:
+              - Authorization
+              - Content-Type
+              - Accept
+              - X-Auth-User-Id
+              - X-Auth-User-Role
+              - X-Pinggy-No-Screen
+              - Ngrok-skip-browser-warning
+            allowCredentials: true
+            maxAge: 3600
       discovery:
         locator:
           enabled: true # Позволяет шлюзу создавать маршруты на основе имен в Eureka
