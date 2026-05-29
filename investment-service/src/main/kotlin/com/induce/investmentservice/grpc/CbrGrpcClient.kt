@@ -3,6 +3,7 @@ package com.induce.investmentservice.grpc
 import com.induce.cbrservice.grpc.CbrGrpcServiceGrpc
 import com.induce.cbrservice.grpc.InflationRequest
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -12,6 +13,7 @@ class CbrGrpcClient(
 ) {
     private val logger = LoggerFactory.getLogger(CbrGrpcClient::class.java)
 
+    @Cacheable(value = ["inflationRate"], key = "'current'")
     fun fetchCurrentInflationRate(): BigDecimal {
         try {
             logger.info("Sending gRPC request to cbr-service for inflation rate")

@@ -5,6 +5,8 @@ import com.induce.investmentservice.dto.DepositRequest
 import com.induce.investmentservice.dto.DepositResponse
 import com.induce.investmentservice.model.Deposit
 import com.induce.investmentservice.repository.DepositRepository
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -53,6 +55,7 @@ class DepositService(private val depositRepository: DepositRepository) {
     }
 
     @Transactional
+    @CacheEvict(value = ["depositHistory"], key = "#userId")
     fun calculateAndSave(request: DepositRequest, userId: UUID): DepositResponse {
         val response = calculate(request)
 
@@ -74,6 +77,7 @@ class DepositService(private val depositRepository: DepositRepository) {
         return response
     }
 
+    @Cacheable(value = ["depositHistory"], key = "#userId")
     fun getAllByUser(userId: UUID): List<DepositHistoryResponse> {
         return depositRepository.findAllByUserId(userId).map {
             DepositHistoryResponse(

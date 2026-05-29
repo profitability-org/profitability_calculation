@@ -2,6 +2,7 @@ package com.induce.investmentservice.service
 
 import com.induce.investmentservice.grpc.CbrGrpcClient
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode

@@ -30,6 +30,8 @@ dependencies {
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.security)
     implementation(libs.spring.grpc.client.starter)
+    implementation(libs.spring.boot.starter.data.redis)
+    implementation(libs.spring.boot.starter.cache)
 
     // gRPC Client & Proto
     implementation(libs.grpc.netty.shaded)

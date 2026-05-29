@@ -5,6 +5,8 @@ import com.induce.investmentservice.dto.StockRequest
 import com.induce.investmentservice.dto.StockResponse
 import com.induce.investmentservice.model.Stock
 import com.induce.investmentservice.repository.StockRepository
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -72,6 +74,7 @@ class StockService(
         )
     }
     @Transactional
+    @CacheEvict(value = ["stockHistory"], key = "#userId")
     fun calculateAndSave(request: StockRequest, userId: UUID): StockResponse {
         val response = calculate(request)
 
@@ -96,6 +99,7 @@ class StockService(
         return response
     }
 
+    @Cacheable(value = ["stockHistory"], key = "#userId")
     fun getAllByUser(userId: UUID): List<StockHistoryResponse> {
         return stockRepository.findAllByUserId(userId).map {
             StockHistoryResponse(

@@ -17,6 +17,20 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: profitability-redis
+    restart: unless-stopped
+    networks:
+      - profitability-backend
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
   eureka-server:
     image: ghcr.io/${IMAGE_REGISTRY:?IMAGE_REGISTRY is required}/profitability-eureka:${IMAGE_TAG:-latest}
     pull_policy: always
@@ -78,12 +92,15 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/profitability_investment
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:?SPRING_DATASOURCE_PASSWORD is required}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       EUREKA_INSTANCE_PREFER_IP_ADDRESS: 'true'
+      SPRING_DATA_REDIS_HOST: redis
     networks:
       - profitability-backend
 
@@ -112,3 +129,4 @@ networks:
 
 volumes:
   postgres-data:
+  redis-data:

@@ -9,6 +9,7 @@ spring:
       - "optional:classpath:eureka-client.yaml"
       - "optional:classpath:spring-doc.yaml"
       - "optional:classpath:grpc-client.yaml"
+      - "optional:classpath:redis.yaml"
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/profitability_investment}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}

@@ -5,6 +5,8 @@ import com.induce.investmentservice.dto.BondRequest
 import com.induce.investmentservice.dto.BondResponse
 import com.induce.investmentservice.model.Bond
 import com.induce.investmentservice.repository.BondRepository
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -80,6 +82,7 @@ class BondService(
     }
 
     @Transactional
+    @CacheEvict(value = ["bondHistory"], key = "#userId")
     fun calculateAndSave(request: BondRequest, userId: UUID): BondResponse {
 
         val response = calculate(request)
@@ -102,7 +105,7 @@ class BondService(
 
         return response
     }
-
+    @Cacheable(value = ["bondHistory"], key = "#userId")
     fun getAllByUser(userId: UUID): List<BondHistoryResponse> {
         return bondRepository.findAllByUserId(userId).map {
             BondHistoryResponse(
