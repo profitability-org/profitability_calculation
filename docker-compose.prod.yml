@@ -18,10 +18,8 @@ services:
       retries: 5
 
   eureka-server:
-    build:
-      context: .
-      args:
-        MODULE_NAME: eureka-server
+    image: ghcr.io/${IMAGE_REGISTRY:?IMAGE_REGISTRY is required}/profitability-eureka:${IMAGE_TAG:-latest}
+    pull_policy: always
     container_name: eureka-server
     restart: unless-stopped
     networks:
@@ -34,10 +32,8 @@ services:
       start_period: 40s
 
   gateway-service:
-    build:
-      context: .
-      args:
-        MODULE_NAME: gateway-service
+    image: ghcr.io/${IMAGE_REGISTRY}/profitability-gateway:${IMAGE_TAG:-latest}
+    pull_policy: always
     container_name: gateway-service
     restart: unless-stopped
     ports:
@@ -53,10 +49,8 @@ services:
       - profitability-backend
 
   auth-service:
-    build:
-      context: .
-      args:
-        MODULE_NAME: auth-service
+    image: ghcr.io/${IMAGE_REGISTRY}/profitability-auth:${IMAGE_TAG:-latest}
+    pull_policy: always
     container_name: auth-service
     restart: unless-stopped
     depends_on:
@@ -75,10 +69,8 @@ services:
       - profitability-backend
 
   investment-service:
-    build:
-      context: .
-      args:
-        MODULE_NAME: investment-service
+    image: ghcr.io/${IMAGE_REGISTRY}/profitability-investment:${IMAGE_TAG:-latest}
+    pull_policy: always
     container_name: investment-service
     restart: unless-stopped
     depends_on:
@@ -96,10 +88,8 @@ services:
       - profitability-backend
 
   cbr-service:
-    build:
-      context: .
-      args:
-        MODULE_NAME: cbr-service
+    image: ghcr.io/${IMAGE_REGISTRY}/profitability-cbr:${IMAGE_TAG:-latest}
+    pull_policy: always
     container_name: cbr-service
     restart: unless-stopped
     depends_on:

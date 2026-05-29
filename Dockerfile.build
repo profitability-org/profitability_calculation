@@ -1,0 +1,13 @@
+# Shared Gradle build stage — one compile for all backend services.
+FROM gradle:9.4-jdk21 AS build
+WORKDIR /app
+
+COPY . .
+
+RUN gradle \
+  :eureka-server:bootJar \
+  :gateway-service:bootJar \
+  :auth-service:bootJar \
+  :investment-service:bootJar \
+  :cbr-service:bootJar \
+  -x test --no-daemon --build-cache

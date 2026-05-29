@@ -4,19 +4,117 @@ on:
   push:
     branches: [master]
 
+env:
+  REGISTRY: ghcr.io
+
 jobs:
+  build-jars:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      owner: ${{ steps.meta.outputs.owner }}
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image owner (lowercase)
+        id: meta
+        run: |
+          owner="${{ vars.IMAGE_REGISTRY || github.repository_owner }}"
+          echo "owner=${owner,,}" >> "$GITHUB_OUTPUT"
+          echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push shared Gradle stage
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.build
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner }}/profitability-jars:${{ steps.meta.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.owner }}/profitability-jars:latest
+          push: true
+          cache-from: type=gha,scope=profitability-backend-build
+          cache-to: type=gha,mode=max,scope=profitability-backend-build
+
+  build-and-push:
+    needs: build-jars
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - module: eureka-server
+            image: profitability-eureka
+          - module: gateway-service
+            image: profitability-gateway
+          - module: auth-service
+            image: profitability-auth
+          - module: investment-service
+            image: profitability-investment
+          - module: cbr-service
+            image: profitability-cbr
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push runtime image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.runtime
+          build-args: |
+            MODULE_NAME=${{ matrix.module }}
+          build-contexts: |
+            build=docker-image://${{ env.REGISTRY }}/${{ needs.build-jars.outputs.owner }}/profitability-jars:${{ needs.build-jars.outputs.tag }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ needs.build-jars.outputs.owner }}/${{ matrix.image }}:${{ needs.build-jars.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ needs.build-jars.outputs.owner }}/${{ matrix.image }}:latest
+          push: true
+          cache-from: type=gha,scope=profitability-${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=profitability-${{ matrix.image }}
+
   deploy:
+    needs: [build-jars, build-and-push]
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via git pull on VPS
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          IMAGE_TAG: ${{ needs.build-jars.outputs.tag }}
+          IMAGE_REGISTRY: ${{ needs.build-jars.outputs.owner }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          envs: IMAGE_TAG,IMAGE_REGISTRY
           script: |
             set -euo pipefail
-            cd ${{ secrets.VPS_BACKEND_PATH }}
-            git fetch origin main
-            git reset --hard origin/main
-            docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+            cd "${{ secrets.VPS_BACKEND_PATH }}"
+            git fetch origin master
+            git reset --hard origin/master
+            export IMAGE_REGISTRY
+            export IMAGE_TAG
+            docker compose -f docker-compose.prod.yml --env-file .env.prod pull
+            for service in eureka-server auth-service investment-service cbr-service gateway-service; do
+              docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --no-deps "$service"
+            done

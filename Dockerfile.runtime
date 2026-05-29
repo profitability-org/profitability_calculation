@@ -1,0 +1,9 @@
+# syntax=docker/dockerfile:1.6
+# Runtime image for a single Spring Boot module (requires build context from Dockerfile.build).
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+
+ARG MODULE_NAME
+COPY --from=build /app/${MODULE_NAME}/build/libs/*.jar /app/app.jar
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
